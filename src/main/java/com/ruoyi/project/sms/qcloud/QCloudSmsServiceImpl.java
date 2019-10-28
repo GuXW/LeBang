@@ -33,18 +33,18 @@ public class QCloudSmsServiceImpl implements ISMSService {
 
     public String sendCode(String mobile) throws Exception {
         String randomCode = getRandomCode(4);
-//        SmsSingleSenderResult results = null;
-//        Map<String, Object> resultmap = new HashMap<>();
-//        SmsSingleSender ssender = new SmsSingleSender(APP_ID, APP_KEY);
-//        results = ssender.sendWithParam("86", mobile, Integer.valueOf(templateId),new String[]{randomCode} , smsSign,"", "");
-//        if (results!=null&&results.result != 0) {
-//           throw  new Exception("短信发送失败，原因:" + results.errMsg);
-//        }
+        SmsSingleSenderResult results = null;
+        Map<String, Object> resultmap = new HashMap<>();
+        SmsSingleSender ssender = new SmsSingleSender(APP_ID, APP_KEY);
+        results = ssender.sendWithParam("86", mobile, Integer.valueOf(templateId),new String[]{randomCode} , smsSign,"", "");
+        if (results!=null&&results.result != 0) {
+            throw  new Exception("短信发送失败，原因:" + results.errMsg);
+        }
         System.out.println(randomCode);
         redisUtils.set(mobile,randomCode);
         redisUtils.expire(mobile,60000);
         //return results.errMsg;
-        return randomCode;
+        return "成功";
     }
 
     //获取随机验证码
