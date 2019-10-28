@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.project.lb.article.mapper.ArticleMapper">
+    
+    <resultMap type="Article" id="ArticleResult">
+        <result property="id"    column="id"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="cid"    column="cid"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="uid"    column="uid"    />
+        <result property="status"    column="status"    />
+        <result property="articleTitle"    column="article_title"    />
+        <result property="articleContent"    column="article_content"    />
+    </resultMap>
+
+    <sql id="selectArticleVo">
+        select id, create_time, cid, update_time, uid, status, article_title, article_content from lb_article
+    </sql>
+
+    <select id="selectArticleList" parameterType="Article" resultMap="ArticleResult">
+        <!--<include refid="selectArticleVo"/>-->
+        select a.id, a.create_time, a.cid, a.update_time, a.uid, a.status, a.article_title, a.article_content,
+        u.user_name createName,u1.user_name updateName
+        from lb_article a
+        left join sys_user u on u.user_id=a.cid
+        left join sys_user u1 on u1.user_id=a.uid
+        <where>  
+            <if test="createName != null  and createName != ''"> and u.user_name like concat('%', #{createName}, '%') </if>
+            <if test="updateName != null  and updateName != ''"> and u1.user_name like concat('%', #{updateName}, '%')</if>
+            <if test="status != null "> and a.status = #{status}</if>
+            <if test="articleTitle != null  and articleTitle != ''"> and a.article_title like concat('%', #{articleTitle}, '%')</if>
+            <if test="articleContent != null  and articleContent != ''"> and a.article_content = #{articleContent}</if>
+        </where>
+    </select>
+    
+    <select id="selectArticleById" parameterType="Long" resultMap="ArticleResult">
+        <include refid="selectArticleVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertArticle" parameterType="Article" useGeneratedKeys="true" keyProperty="id">
+        insert into lb_article
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="createTime != null ">create_time,</if>
+            <if test="cid != null ">cid,</if>
+            <if test="updateTime != null ">update_time,</if>
+            <if test="uid != null ">uid,</if>
+            <if test="status != null ">status,</if>
+            <if test="articleTitle != null  and articleTitle != ''">article_title,</if>
+            <if test="articleContent != null  and articleContent != ''">article_content,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="createTime != null ">#{createTime},</if>
+            <if test="cid != null ">#{cid},</if>
+            <if test="updateTime != null ">#{updateTime},</if>
+            <if test="uid != null ">#{uid},</if>
+            <if test="status != null ">#{status},</if>
+            <if test="articleTitle != null  and articleTitle != ''">#{articleTitle},</if>
+            <if test="articleContent != null  and articleContent != ''">#{articleContent},</if>
+         </trim>
+    </insert>
+
+    <update id="updateArticle" parameterType="Article">
+        update lb_article
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="createTime != null ">create_time = #{createTime},</if>
+            <if test="cid != null ">cid = #{cid},</if>
+            <if test="updateTime != null ">update_time = #{updateTime},</if>
+            <if test="uid != null ">uid = #{uid},</if>
+            <if test="status != null ">status = #{status},</if>
+            <if test="articleTitle != null  and articleTitle != ''">article_title = #{articleTitle},</if>
+            <if test="articleContent != null  and articleContent != ''">article_content = #{articleContent},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteArticleById" parameterType="Long">
+       /* delete from lb_article where id = #{id}*/
+        update lb_article set status=0 where id = #{id}
+    </delete>
+
+    <delete id="deleteArticleByIds" parameterType="String">
+       /* delete from lb_article where id in */
+        update lb_article set status=0 where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    
+</mapper>

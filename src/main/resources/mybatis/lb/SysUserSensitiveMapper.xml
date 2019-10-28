@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.project.lb.sensitive.mapper.SysUserSensitiveMapper">
+    
+    <resultMap type="SysUserSensitive" id="SysUserSensitiveResult">
+        <result property="id"    column="id"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="cid"    column="cid"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="uid"    column="uid"    />
+        <result property="status"    column="status"    />
+        <result property="idCardName"    column="id_card_name"    />
+        <result property="idCardNum"    column="id_card_num"    />
+        <result property="idCardPositive"    column="id_card_positive"    />
+        <result property="idCardNegative"    column="id_card_negative"    />
+        <result property="receivingAccount"    column="receiving_account"    />
+        <result property="receivingChart"    column="receiving_chart"    />
+        <result property="invitationCode"    column="invitation_code"    />
+        <result property="invitationQrcode"    column="invitation_qrcode"    />
+        <result property="invitationId"    column="invitation_id"    />
+        <result property="userId"    column="user_id"    />
+        <result property="userLevel"    column="user_level"    />
+        <result property="userLoveVal"    column="user_love_val"    />
+        <result property="userAmount"    column="user_amount"    />
+        <result property="predeterminedAmount"    column="predetermined_amount"    />
+        <result property="userCredentials"    column="user_credentials"    />
+        <result property="receivingChannel"    column="receiving_channel"    />
+        <result property="taskType"    column="task_type"    />
+        <result property="activationTime"    column="activation_time"    />
+    </resultMap>
+
+    <sql id="selectSysUserSensitiveVo">
+        select id, create_time, cid, update_time, uid, status, id_card_name, id_card_num, id_card_positive, id_card_negative,receiving_channel, receiving_account, receiving_chart, invitation_code, invitation_qrcode, invitation_id, user_id, user_level ,user_love_val,user_amount,predetermined_amount, user_credentials ,task_type from sys_user_sensitive
+    </sql>
+
+    <select id="selectSysUserSensitiveList" parameterType="SysUserSensitive" resultMap="SysUserSensitiveResult">
+<!--        <include refid="selectSysUserSensitiveVo"/>-->
+        select s.id, s.create_time, s.cid, s.update_time, s.uid, s.status confirmStatus , s.id_card_name, s.id_card_num, s.id_card_positive,
+            s.id_card_negative, s.receiving_account, s.receiving_chart, s.invitation_code, s.invitation_qrcode, s.invitation_id,s.task_type,
+            s.user_id, s.user_level,s.user_love_val,s.user_amount,s.predetermined_amount, s.user_credentials,s.receiving_channel,s.activation_time,
+            u.user_name createName,u1.user_name updateName,
+            u2.login_name loginName,u2.user_name userName,u2.phonenumber,u2.status,
+            invitation_user.user_name invitationName
+        from sys_user_sensitive s
+        left join sys_user u on u.user_id=s.cid
+        left join sys_user u1 on u1.user_id=s.uid
+        left join sys_user u2 on u2.user_id=s.user_id
+        left join sys_user invitation_user on invitation_user.user_id=s.invitation_id
+        <where>
+            <if test="status != null and status != 0 "> and u2.del_flag = 2</if>
+            <if test="status != null and status == 0 "> and u2.del_flag = 0</if>
+            <if test="userName != null  and userName != ''"> and u2.user_name like concat('%', #{userName}, '%')</if>
+            <if test="idCardNum != null  and idCardNum != ''"> and s.id_card_num = #{idCardNum}</if>
+            <if test="receivingAccount != null  and receivingAccount != ''"> and s.receiving_account = #{receivingAccount}</if>
+            <if test="invitationCode != null  and invitationCode != ''"> and s.invitation_code = #{invitationCode}</if>
+            <if test="invitationId != null "> and s.invitation_id = #{invitationId}</if>
+            <if test="userId != null "> and s.user_id = #{userId}</if>
+            <if test="userLevel != null "> and s.user_level = #{userLevel}</if>
+            <if test="userLoveVal != null "> and s.user_love_val = #{userLoveVal}</if>
+            <if test="userAmount != null "> and s.user_amount = #{userAmount}</if>
+            <if test="confirmStatus != null "> and s.status = #{confirmStatus}</if>
+            <if test="invitationName != null  and invitationName != ''"> and invitation_user.user_name like concat('%', #{invitationName}, '%')</if>
+            <if test="receivingChannel != null "> and s.receiving_channel = #{receivingChannel}</if>
+            <if test="taskType != null "> and s.task_type = #{taskType}</if>
+            <if test="phonenumber != null and phonenumber != '' "> and u2.phonenumber  like concat('%', #{phonenumber},'%') </if>
+        </where>
+    </select>
+    
+    <select id="selectSysUserSensitiveByUserId" parameterType="Long" resultMap="SysUserSensitiveResult">
+       <!-- <include refid="selectSysUserSensitiveVo"/>-->
+        select s.id, s.create_time, s.cid, s.update_time, s.uid, s.status confirmStatus ,  s.id_card_name, s.id_card_num, s.id_card_positive,
+        s.id_card_negative, s.receiving_account, s.receiving_chart, s.invitation_code, s.invitation_qrcode, s.invitation_id,s.activation_time,
+        s.user_id, s.user_level,s.user_love_val,s.user_amount,s.predetermined_amount,s.user_credentials,s.receiving_channel,s.task_type,
+        u2.login_name loginName,u2.user_name userName,u2.phonenumber ,u2.status,u2.del_flag delFlag,
+        invitation_user.user_name invitationName
+        from sys_user_sensitive s
+        left join sys_user u2 on u2.user_id=s.user_id
+        left join sys_user invitation_user on invitation_user.user_id=s.invitation_id
+        where s.user_id = #{id}
+    </select>
+
+    <select id="selectSysUserSensitiveById" parameterType="Long" resultMap="SysUserSensitiveResult">
+        <!-- <include refid="selectSysUserSensitiveVo"/>-->
+        select s.id, s.create_time, s.cid, s.update_time, s.uid, s.status confirmStatus, s.id_card_name, s.id_card_num, s.id_card_positive,
+        s.id_card_negative, s.receiving_account, s.receiving_chart, s.invitation_code, s.invitation_qrcode, s.invitation_id,s.activation_time,
+        s.user_id, s.user_level,s.user_love_val,s.user_amount,s.predetermined_amount,s.user_credentials,s.receiving_channel,s.task_type,
+        u2.login_name loginName,u2.user_name userName,u2.phonenumber, u2.status,
+        invitation_user.user_name invitationName
+        from sys_user_sensitive s
+        left join sys_user u2 on u2.user_id=s.user_id
+        left join sys_user invitation_user on invitation_user.user_id=s.invitation_id
+        where s.id = #{id}
+    </select>
+
+    <select id="getNewActivationer"  resultType="String">
+        select u2.phonenumber  from sys_user_sensitive s left join sys_user u2 on u2.user_id=s.user_id order by s.activation_time desc limit 0,10
+    </select>
+
+    <insert id="insertSysUserSensitive" parameterType="SysUserSensitive" useGeneratedKeys="true" keyProperty="id">
+        insert into sys_user_sensitive
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="createTime != null ">create_time,</if>
+            <if test="cid != null ">cid,</if>
+            <if test="updateTime != null ">update_time,</if>
+            <if test="uid != null ">uid,</if>
+            <if test="status != null ">status,</if>
+            <if test="idCardName != null  and idCardName != ''">id_card_name,</if>
+            <if test="idCardNum != null  and idCardNum != ''">id_card_num,</if>
+            <if test="idCardPositive != null  and idCardPositive != ''">id_card_positive,</if>
+            <if test="idCardNegative != null  and idCardNegative != ''">id_card_negative,</if>
+            <if test="receivingAccount != null  and receivingAccount != ''">receiving_account,</if>
+            <if test="receivingChart != null  and receivingChart != ''">receiving_chart,</if>
+            <if test="invitationCode != null  and invitationCode != ''">invitation_code,</if>
+            <if test="invitationQrcode != null  and invitationQrcode != ''">invitation_qrcode,</if>
+            <if test="invitationId != null ">invitation_id,</if>
+            <if test="userId != null ">user_id,</if>
+            <if test="userLevel != null ">user_level,</if>
+            <if test="userLoveVal != null ">user_love_val,</if>
+            <if test="userAmount != null ">user_amount,</if>
+            <if test="predeterminedAmount != null ">predetermined_amount,</if>
+            <if test="userCredentials != null  and userCredentials != ''">user_credentials,</if>
+            <if test="receivingChannel != null ">receiving_channel,</if>
+            <if test="taskType != null "> task_type,</if>
+            <if test="activationTime != null "> activation_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="createTime != null ">#{createTime},</if>
+            <if test="cid != null ">#{cid},</if>
+            <if test="updateTime != null ">#{updateTime},</if>
+            <if test="uid != null ">#{uid},</if>
+            <if test="status != null ">#{status},</if>
+            <if test="idCardName != null  and idCardName != ''">#{idCardName},</if>
+            <if test="idCardNum != null  and idCardNum != ''">#{idCardNum},</if>
+            <if test="idCardPositive != null  and idCardPositive != ''">#{idCardPositive},</if>
+            <if test="idCardNegative != null  and idCardNegative != ''">#{idCardNegative},</if>
+            <if test="receivingAccount != null  and receivingAccount != ''">#{receivingAccount},</if>
+            <if test="receivingChart != null  and receivingChart != ''">#{receivingChart},</if>
+            <if test="invitationCode != null  and invitationCode != ''">#{invitationCode},</if>
+            <if test="invitationQrcode != null  and invitationQrcode != ''">#{invitationQrcode},</if>
+            <if test="invitationId != null ">#{invitationId},</if>
+            <if test="userId != null ">#{userId},</if>
+            <if test="userLevel != null ">#{userLevel},</if>
+            <if test="userLoveVal != null ">  #{userLoveVal},</if>
+            <if test="userAmount != null "> #{userAmount},</if>
+            <if test="predeterminedAmount != null "> #{predeterminedAmount},</if>
+            <if test="userCredentials != null  and userCredentials != ''"> #{userCredentials},</if>
+            <if test="receivingChannel != null ">#{receivingChannel},</if>
+            <if test="taskType != null "> #{taskType},</if>
+            <if test="activationTime != null "> #{activationTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateSysUserSensitive" parameterType="SysUserSensitive">
+        update sys_user_sensitive
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="createTime != null ">create_time = #{createTime},</if>
+            <if test="cid != null ">cid = #{cid},</if>
+            <if test="updateTime != null ">update_time = #{updateTime},</if>
+            <if test="uid != null ">uid = #{uid},</if>
+            <if test="status != null ">status = #{status},</if>
+            <if test="idCardName != null  and idCardName != ''">id_card_name = #{idCardName},</if>
+            <if test="idCardNum != null  and idCardNum != ''">id_card_num = #{idCardNum},</if>
+            <if test="idCardPositive != null  and idCardPositive != ''">id_card_positive = #{idCardPositive},</if>
+            <if test="idCardNegative != null  and idCardNegative != ''">id_card_negative = #{idCardNegative},</if>
+            <if test="receivingAccount != null  and receivingAccount != ''">receiving_account = #{receivingAccount},</if>
+            <if test="receivingChart != null  and receivingChart != ''">receiving_chart = #{receivingChart},</if>
+            <if test="invitationCode != null  ">invitation_code = #{invitationCode},</if>
+            <if test="invitationQrcode != null  and invitationQrcode != ''">invitation_qrcode = #{invitationQrcode},</if>
+            <if test="invitationId != null ">invitation_id = #{invitationId},</if>
+            <if test="userId != null ">user_id = #{userId},</if>
+            <if test="userLevel != null ">user_level = #{userLevel},</if>
+            <if test="userLoveVal != null ">  user_love_val = #{userLoveVal},</if>
+            <if test="userAmount != null ">  user_amount = #{userAmount},</if>
+            <if test="predeterminedAmount != null "> predetermined_amount = #{predeterminedAmount},</if>
+            <if test="userCredentials != null  and userCredentials != ''"> user_credentials=#{userCredentials},</if>
+            <if test="receivingChannel != null "> receiving_channel=#{receivingChannel},</if>
+            <if test="taskType != null ">  task_type = #{taskType},</if>
+            <if test="activationTime != null "> activation_time = #{activationTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteSysUserSensitiveById" parameterType="Long">
+        /*delete from sys_user_sensitive where id = #{id}*/
+        update sys_user_sensitive set status=0 where id = #{id}
+    </delete>
+
+    <delete id="deleteSysUserSensitiveByIds" parameterType="String">
+        /*delete from sys_user_sensitive*/
+        update sys_user_sensitive set status=0 where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <resultMap id="getSub" type="SysUserSensitive">
+        <result property="userId"    column="user_id"    />
+        <result property="userLevel"    column="user_level"    />
+        <result property="invitationId"    column="invitation_id"    />
+        <collection property="userSensitiveList" select="queryAllSubUserByInvitation" column="user_id"></collection>
+    </resultMap>
+
+    <select id="queryAllSubUserByInvitation" parameterType="Long" resultMap="getSub" >
+        select us.user_id,us.invitation_id,us.user_level from sys_user_sensitive us left join sys_user u on u.user_id=us.user_id where u.status=0 and us.invitation_id=#{userId}
+    </select>
+
+    <resultMap id="getInviter" type="SysUserSensitive">
+        <result property="userId"    column="user_id"    />
+        <result property="userLevel"    column="user_level"    />
+        <result property="invitationId"    column="invitation_id"    />
+        <result property="userAmount"    column="user_amount"    />
+        <result property="predeterminedAmount"    column="predetermined_amount"    />
+        <result property="delFlag"    column="del_flag"    />
+        <collection property="inviter" select="queryAllInvitationByInvitationId" column="invitation_id"></collection>
+    </resultMap>
+
+    <select id="queryAllInvitationByInvitationId" parameterType="Long" resultMap="getInviter" >
+        select us.user_id,us.invitation_id,us.user_level,us.user_amount,us.predetermined_amount,u.del_flag from sys_user_sensitive us left join sys_user u on us.user_id =u.user_id where u.status=0 and us.user_id=#{invitationId}
+    </select>
+
+</mapper>

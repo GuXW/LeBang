@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.project.lb.chart.mapper.RotationChartMapper">
+    
+    <resultMap type="RotationChart" id="RotationChartResult">
+        <result property="id"    column="id"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="cid"    column="cid"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="uid"    column="uid"    />
+        <result property="status"    column="status"    />
+        <result property="picPath"    column="pic_path"    />
+    </resultMap>
+
+    <sql id="selectRotationChartVo">
+        select id, create_time, cid, update_time, uid, status, pic_path from lb_rotation_chart
+    </sql>
+
+    <select id="selectRotationChartList" parameterType="RotationChart" resultMap="RotationChartResult">
+        <include refid="selectRotationChartVo"/>
+        <where>  
+            <if test="cid != null "> and cid = #{cid}</if>
+            <if test="uid != null "> and uid = #{uid}</if>
+            <if test="status != null "> and status = #{status}</if>
+            <if test="picPath != null  and picPath != ''"> and pic_path = #{picPath}</if>
+        </where>
+    </select>
+    
+    <select id="selectRotationChartById" parameterType="Long" resultMap="RotationChartResult">
+        <include refid="selectRotationChartVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertRotationChart" parameterType="RotationChart" useGeneratedKeys="true" keyProperty="id">
+        insert into lb_rotation_chart
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="createTime != null ">create_time,</if>
+            <if test="cid != null ">cid,</if>
+            <if test="updateTime != null ">update_time,</if>
+            <if test="uid != null ">uid,</if>
+            <if test="status != null ">status,</if>
+            <if test="picPath != null  and picPath != ''">pic_path,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="createTime != null ">#{createTime},</if>
+            <if test="cid != null ">#{cid},</if>
+            <if test="updateTime != null ">#{updateTime},</if>
+            <if test="uid != null ">#{uid},</if>
+            <if test="status != null ">#{status},</if>
+            <if test="picPath != null  and picPath != ''">#{picPath},</if>
+         </trim>
+    </insert>
+
+    <update id="updateRotationChart" parameterType="RotationChart">
+        update lb_rotation_chart
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="createTime != null ">create_time = #{createTime},</if>
+            <if test="cid != null ">cid = #{cid},</if>
+            <if test="updateTime != null ">update_time = #{updateTime},</if>
+            <if test="uid != null ">uid = #{uid},</if>
+            <if test="status != null ">status = #{status},</if>
+            <if test="picPath != null  and picPath != ''">pic_path = #{picPath},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteRotationChartById" parameterType="Long">
+       /* delete from lb_rotation_chart where id = #{id}*/
+        update lb_rotation_chart set status=0 where id = #{id}
+    </delete>
+
+    <delete id="deleteRotationChartByIds" parameterType="String">
+        /*delete from lb_rotation_chart where id in*/
+        update lb_rotation_chart set status=0 where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    
+</mapper>

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('活动任务列表')" />
+</head>
+<body class="gray-bg">
+     <div class="container-div">
+        <div class="row">
+            <div class="col-sm-12 search-collapse">
+                <form id="formId">
+                    <div class="select-list">
+                        <ul>
+
+                            <li>
+                                <p>活动标题：</p>
+                                <input type="text" name="activityTitle"/>
+                            </li>
+                            <li class="select-time">
+                                <p>开奖日期：</p>
+                                <input type="text" class="time-input" id="startTime" placeholder="开始时间" name="params[beginLotteryTime]"/>
+                                <span>-</span>
+                                <input type="text" class="time-input" id="endTime" placeholder="结束时间" name="params[endLotteryTime]"/>
+                            </li>
+                            <li>
+                                <p>状态：</p>
+                                <select name="activityState" th:with="type=${@dict.getType('activity_status')}">
+                                    <option value="">所有</option>
+                                    <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                                </select>
+                            </li>
+                            <li>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                            </li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+
+            <div class="btn-group-sm" id="toolbar" role="group">
+                <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="lb:task:add">
+                    <i class="fa fa-plus"></i> 创建活动
+                </a>
+                <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="lb:task:export">
+                    <i class="fa fa-download"></i> 导出
+                 </a>
+            </div>
+            <div class="col-sm-12 select-table table-striped">
+                <table id="bootstrap-table" data-mobile-responsive="true"></table>
+            </div>
+        </div>
+    </div>
+    <th:block th:include="include :: footer" />
+    <script th:inline="javascript">
+        var editFlag = [[${@permission.hasPermi('lb:task:edit')}]];
+        var removeFlag = [[${@permission.hasPermi('lb:task:remove')}]];
+        var prefix = ctx + "lb/task";
+        var statusDatas = [[${@dict.getType('activity_status')}]];
+        $(function() {
+            var options = {
+                url: prefix + "/list",
+                createUrl: prefix + "/add",
+                updateUrl: prefix + "/edit/{id}",
+                removeUrl: prefix + "/remove",
+                exportUrl: prefix + "/export",
+                modalName: "活动任务",
+                columns: [{
+                    checkbox: true
+                },
+                {
+                    field : 'id', 
+                    title : 'id',
+                    visible: false
+                },
+                {
+                    field : 'activityTitle', 
+                    title : '活动标题'
+                },
+                {
+                    field : 'activityPic', 
+                    title : '图片',
+                    formatter: function(value, row, index) {
+                        // 图片预览（注意：如存储在本地直接获取数据库路径，如有配置context-path需要使用ctx+路径）
+                        // 如：/profile/upload/2019/08/08/3b7a839aced67397bac694d77611ce72.png
+                        return $.table.imageView(value);
+                    }
+                },
+                {
+                    field : 'participantNum',
+                    title : '参与人数'
+                },
+                {
+                    field : 'lotteryTime', 
+                    title : '开奖日期'
+                },
+                {
+                    field : 'createName',
+                    title : '创建人'
+                },
+                {
+                    field : 'createTime',
+                    title : '创建日期'
+                },
+                {
+                    field : 'updateName',
+                    title : '更新人'
+                },
+                {
+                    field : 'activityState', 
+                    title : '状态',
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(statusDatas, value);
+                    }
+                },
+                {
+                    title: '操作',
+                    align: 'center',
+                    formatter: function(value, row, index) {
+                        var actions = [];
+                        actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="$.operate.edit(\'' + row.id + '\')"><i class="fa fa-edit"></i>查看详情</a> ');
+                        actions.push('<a class="btn btn-danger btn-xs " href="javascript:void(0)" onclick="openWinner(\'' + row.id+ '\') "><i class="fa fa-remove"></i>开奖</a>');
+                        return actions.join('');
+                    }
+                }]
+            };
+            $.table.init(options);
+        });
+        //开奖
+        function openWinner(id){
+            console.log(id);
+            $.post(prefix + "/open_winner",{"id":id},function (data) {
+                if (data.code==0){
+                    $.modal.alert("开奖成功");
+                }else{
+                    $.modal.alert(data.msg);
+                }
+                $('button[name=refresh]').click();
+            });
+        }
+    </script>
+</body>
+</html>

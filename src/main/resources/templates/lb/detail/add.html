@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <th:block th:include="include :: header('新增用户转账明细')" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <form class="form-horizontal m" id="form-detail-add">
+            <input type="hidden" name="status" id="status" value="1" >
+
+            <div class="form-group">
+                <label class="col-sm-3 control-label">收款人：</label>
+                <div class="col-sm-8">
+                    <select id="toId"  name="toId" class="form-control "   >
+                        <option value="">请选择收款人</option>
+                        <option th:each="toId:${sysUser}" th:value="${toId.userId}" th:text="${toId.userName}"  th:disabled="${toId.status == 0}"></option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">    
+                <label class="col-sm-3 control-label">付款人：</label>
+                <div class="col-sm-8">
+                    <select id="fromId"  name="fromId" class="form-control "   >
+                        <option value="">请选择付款人</option>
+                        <option th:each="fromId:${sysUser}" th:value="${fromId.userId}" th:text="${fromId.userName}"  th:disabled="${fromId.status == 0}"></option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">    
+                <label class="col-sm-3 control-label">上升等级：</label>
+                <div class="col-sm-8">
+                    <select id="upLevel"  name="upLevel" class="form-control "   >
+                        <option value="">请选择上升等级</option>
+                        <option th:each="upLevel:${amountLevel}" th:value="${upLevel.taskLevel}" th:text="${upLevel.taskLevel}"  th:disabled="${upLevel.status == 0}"></option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">    
+                <label class="col-sm-3 control-label">需打款金额：</label>
+                <div class="col-sm-8">
+                    <select id="amount"  name="amount" class="form-control "    disabled>
+                        <option th:each="amounts:${amountLevel}" th:value="${amounts.amount}" th:text="${amounts.amount}"  th:disabled="${upLevel.status == 0}"></option>
+                    </select>
+                </div>
+            </div>
+        </form>
+    </div>
+    <th:block th:include="include :: footer" />
+    <script type="text/javascript">
+        var prefix = ctx + "lb/detail"
+        $("#form-detail-add").validate({
+            rules: {
+                toId: "required",
+                fromId: "required",
+                upLevel: ""
+            },
+            messages: {
+                toId: "收款人不能为空",
+                fromId: "付款人不能为空",
+            }
+        });
+
+        function submitHandler() {
+            if ($.validate.form()) {
+                $.operate.save(prefix + "/add", $('#form-detail-add').serialize());
+            }
+        }
+    </script>
+</body>
+</html>

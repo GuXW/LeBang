@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.project.lb.detail.mapper.TransferDetailMapper">
+    
+    <resultMap type="TransferDetail" id="TransferDetailResult">
+        <result property="id"    column="id"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="cid"    column="cid"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="uid"    column="uid"    />
+        <result property="status"    column="status"    />
+        <result property="toId"    column="to_id"    />
+        <result property="fromId"    column="from_id"    />
+        <result property="upLevel"    column="up_level"    />
+        <result property="amount"    column="amount"    />
+        <result property="paymentCertificate"    column="payment_certificate"    />
+    </resultMap>
+
+    <sql id="selectTransferDetailVo">
+        select id, create_time, cid, update_time, uid, status, to_id, from_id, up_level, amount from lb_transfer_detail
+    </sql>
+
+    <select id="selectTransferDetailList" parameterType="TransferDetail" resultMap="TransferDetailResult">
+        <!--<include refid="selectTransferDetailVo"/>-->
+        select d.id, d.create_time, d.cid, d.update_time, d.uid, d.status, d.to_id, d.from_id, d.up_level, d.amount,d.payment_certificate,
+            from_user.id_card_name fromName,from_user.id_card_num fromIdCardNum,
+            to_user.id_card_name toName,to_user.id_card_num toIdCardNum
+         from lb_transfer_detail d
+        left join sys_user_sensitive from_user on from_user.user_id=d.from_id
+        left join sys_user_sensitive to_user on to_user.user_id=d.to_id
+        <where>  
+            <if test="cid != null "> and d.cid = #{cid}</if>
+            <if test="uid != null "> and d.uid = #{uid}</if>
+            <if test="status != null "> and d.status = #{status}</if>
+            <if test="toId != null "> and d.to_id = #{toId}</if>
+            <if test="fromId != null "> and d.from_id = #{fromId}</if>
+            <if test="upLevel != null "> and d.up_level = #{upLevel}</if>
+            <if test="amount != null "> and d.amount = #{amount}</if>
+            <if test="fromName != null and fromName != '' "> and from_user.id_card_name  like concat('%', #{fromName}, '%') </if>
+            <if test="toName != null and toName != '' "> and to_user.id_card_name  like concat('%', #{toName}, '%') </if>
+            <if test="fromId != null "> and d.from_id = #{fromId}</if>
+            <if test="noStatus != null "> and d.status != #{noStatus}</if>
+        </where>
+    </select>
+
+    <select id="selectTransferDetailById" parameterType="Long" resultMap="TransferDetailResult">
+          select d.id, d.create_time, d.cid, d.update_time, d.uid, d.status, d.to_id, d.from_id, d.up_level, d.amount,d.payment_certificate,
+            from_user.id_card_name fromName,from_user.id_card_num fromIdCardNum,
+            to_user.id_card_name toName,to_user.id_card_num toIdCardNum,to_user.receiving_chart receivingChart,to_user.receiving_account receivingAccount
+         from lb_transfer_detail d
+        left join sys_user_sensitive from_user on from_user.user_id=d.from_id
+        left join sys_user_sensitive to_user on to_user.user_id=d.to_id
+        where d.id = #{id}
+    </select>
+        
+    <insert id="insertTransferDetail" parameterType="TransferDetail" useGeneratedKeys="true" keyProperty="id">
+        insert into lb_transfer_detail
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="createTime != null ">create_time,</if>
+            <if test="cid != null ">cid,</if>
+            <if test="updateTime != null ">update_time,</if>
+            <if test="uid != null ">uid,</if>
+            <if test="status != null ">status,</if>
+            <if test="toId != null ">to_id,</if>
+            <if test="fromId != null ">from_id,</if>
+            <if test="upLevel != null ">up_level,</if>
+            <if test="amount != null ">amount,</if>
+            <if test="paymentCertificate != null  and paymentCertificate != ''">payment_certificate,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="createTime != null ">#{createTime},</if>
+            <if test="cid != null ">#{cid},</if>
+            <if test="updateTime != null ">#{updateTime},</if>
+            <if test="uid != null ">#{uid},</if>
+            <if test="status != null ">#{status},</if>
+            <if test="toId != null ">#{toId},</if>
+            <if test="fromId != null ">#{fromId},</if>
+            <if test="upLevel != null ">#{upLevel},</if>
+            <if test="amount != null ">#{amount},</if>
+            <if test="paymentCertificate != null  and paymentCertificate != ''">#{paymentCertificate},</if>
+         </trim>
+    </insert>
+
+    <update id="updateTransferDetail" parameterType="TransferDetail">
+        update lb_transfer_detail
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="createTime != null ">create_time = #{createTime},</if>
+            <if test="cid != null ">cid = #{cid},</if>
+            <if test="updateTime != null ">update_time = #{updateTime},</if>
+            <if test="uid != null ">uid = #{uid},</if>
+            <if test="status != null ">status = #{status},</if>
+            <if test="toId != null ">to_id = #{toId},</if>
+            <if test="fromId != null ">from_id = #{fromId},</if>
+            <if test="upLevel != null ">up_level = #{upLevel},</if>
+            <if test="amount != null ">amount = #{amount},</if>
+            <if test="paymentCertificate != null and paymentCertificate != ''"> payment_certificate=#{paymentCertificate},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteTransferDetailById" parameterType="Long">
+       /* delete from lb_transfer_detail where id = #{id}*/
+        update lb_transfer_detail set status=0 where id = #{id}
+    </delete>
+
+    <delete id="deleteTransferDetailByIds" parameterType="String">
+        /*delete from lb_transfer_detail*/
+        update lb_transfer_detail where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+
+    
+</mapper>

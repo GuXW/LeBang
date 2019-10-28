@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.project.lb.task.mapper.ActivityTaskMapper">
+    
+    <resultMap type="ActivityTask" id="ActivityTaskResult">
+        <result property="id"    column="id"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="cid"    column="cid"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="uid"    column="uid"    />
+        <result property="status"    column="status"    />
+        <result property="activityTitle"    column="activity_title"    />
+        <result property="activityPic"    column="activity_pic"    />
+        <result property="lotteryTime"    column="lottery_time"    />
+        <result property="activityState"    column="activity_state"    />
+        <result property="activityRemark"    column="activity_remark"    />
+        <result property="winnersNumber"    column="winners_number"    />
+    </resultMap>
+
+    <sql id="selectActivityTaskVo">
+        select id, create_time, cid, update_time, uid, status, activity_title, activity_pic,
+            lottery_time, activity_state,activity_remark,winners_number
+        from lb_activity_task
+
+    </sql>
+
+    <select id="selectActivityTaskList" parameterType="ActivityTask" resultMap="ActivityTaskResult">
+       <!-- <include refid="selectActivityTaskVo"/>-->
+        select t.id, t.create_time, t.cid, t.update_time, t.uid, t.status, t.activity_title, t.activity_pic,
+        t.lottery_time, t.activity_state,t.activity_remark,t.winners_number,
+        u.user_name createName,u1.user_name updateName,
+        count(d.id) participantNum
+        from lb_activity_task t
+        left join sys_user u on u.user_id=t.cid
+        left join sys_user u1 on u1.user_id=t.uid
+        left join lb_activity_task_detail d on d.task_id=t.id
+        <where>  
+            <if test="cid != null "> and t.cid = #{cid}</if>
+            <if test="uid != null "> and t.uid = #{uid}</if>
+            <if test="status != null "> and t.status = #{status}</if>
+            <if test="activityTitle != null  and activityTitle != ''"> and t.activity_title = #{activityTitle}</if>
+            <if test="activityPic != null  and activityPic != ''"> and t.activity_pic = #{activityPic}</if>
+            <if test="lotteryTime != null "> and t.lottery_time = #{lotteryTime}</if>
+            <if test="activityState != null "> and t.activity_state = #{activityState}</if>
+            <if test="activityRemark != null  and activityRemark != ''"> and t.activity_remark = #{activityRemark}</if>
+            <if test="winnersNumber != null "> and t.winners_number = #{winnersNumber}</if>
+        </where>
+        group by t.id, t.create_time, t.cid, t.update_time, t.uid, t.status, t.activity_title, t.activity_pic,
+        t.lottery_time, t.activity_state,t.activity_remark,t.winners_number
+    </select>
+
+    <select id="selectActivityTaskListByUserId" parameterType="ActivityTask" resultMap="ActivityTaskResult">
+        <!-- <include refid="selectActivityTaskVo"/>-->
+        select t.id, t.create_time, t.cid, t.update_time, t.uid, t.status, t.activity_title, t.activity_pic,
+        t.lottery_time, t.activity_state,t.activity_remark,t.winners_number,
+        u.user_name createName,u1.user_name updateName
+        from lb_activity_task t
+        left join sys_user u on u.user_id=t.cid
+        left join sys_user u1 on u1.user_id=t.uid
+        left join lb_activity_task_detail d on d.task_id=t.id
+        <where>
+            <if test="userId != null "> and d.user_id = #{userId}</if>
+        </where>
+    </select>
+    
+    <select id="selectActivityTaskById" parameterType="Long" resultMap="ActivityTaskResult">
+        <include refid="selectActivityTaskVo"/>
+        where id = #{id}
+    </select>
+
+    <select id="queryCurrentActivityTask" parameterType="ActivityTask" resultMap="ActivityTaskResult">
+        <!-- <include refid="selectActivityTaskVo"/>-->
+        select t.id, t.create_time, t.cid, t.update_time, t.uid, t.status, t.activity_title, t.activity_pic,
+        t.lottery_time, t.activity_state,t.activity_remark,t.winners_number
+        from lb_activity_task t
+        where t.status=1
+        order by t.id desc limit 0,1
+    </select>
+
+        
+    <insert id="insertActivityTask" parameterType="ActivityTask" useGeneratedKeys="true" keyProperty="id">
+        insert into lb_activity_task
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="createTime != null ">create_time,</if>
+            <if test="cid != null ">cid,</if>
+            <if test="updateTime != null ">update_time,</if>
+            <if test="uid != null ">uid,</if>
+            <if test="status != null ">status,</if>
+            <if test="activityTitle != null  and activityTitle != ''">activity_title,</if>
+            <if test="activityPic != null  and activityPic != ''">activity_pic,</if>
+            <if test="lotteryTime != null ">lottery_time,</if>
+            <if test="activityState != null ">activity_state,</if>
+            <if test="activityRemark != null  and activityRemark != ''"> activity_remark,</if>
+            <if test="winnersNumber != null ">winners_number,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="createTime != null ">#{createTime},</if>
+            <if test="cid != null ">#{cid},</if>
+            <if test="updateTime != null ">#{updateTime},</if>
+            <if test="uid != null ">#{uid},</if>
+            <if test="status != null ">#{status},</if>
+            <if test="activityTitle != null  and activityTitle != ''">#{activityTitle},</if>
+            <if test="activityPic != null  and activityPic != ''">#{activityPic},</if>
+            <if test="lotteryTime != null ">#{lotteryTime},</if>
+            <if test="activityState != null ">#{activityState},</if>
+            <if test="activityRemark != null  and activityRemark != ''"> #{activityRemark},</if>
+            <if test="winnersNumber != null ">#{winnersNumber},</if>
+         </trim>
+    </insert>
+
+    <update id="updateActivityTask" parameterType="ActivityTask">
+        update lb_activity_task
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="createTime != null ">create_time = #{createTime},</if>
+            <if test="cid != null ">cid = #{cid},</if>
+            <if test="updateTime != null ">update_time = #{updateTime},</if>
+            <if test="uid != null ">uid = #{uid},</if>
+            <if test="status != null ">status = #{status},</if>
+            <if test="activityTitle != null  and activityTitle != ''">activity_title = #{activityTitle},</if>
+            <if test="activityPic != null  and activityPic != ''">activity_pic = #{activityPic},</if>
+            <if test="lotteryTime != null ">lottery_time = #{lotteryTime},</if>
+            <if test="activityState != null ">activity_state = #{activityState},</if>
+            <if test="activityRemark != null  and activityRemark != ''">activity_remark = #{activityRemark},</if>
+            <if test="winnersNumber != null ">winners_number = #{winnersNumber},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteActivityTaskById" parameterType="Long">
+         update lb_activity_task set status=0 where id = #{id}
+    </delete>
+
+    <delete id="deleteActivityTaskByIds" parameterType="String">
+        update lb_activity_task set status=0 where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    
+</mapper>

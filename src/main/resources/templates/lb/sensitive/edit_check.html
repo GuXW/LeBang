@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <th:block th:include="include :: header('修改用户敏感数据')" />
+    <th:block th:include="include :: datetimepicker-css" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <form class="form-horizontal m" id="form-sensitive-edit" th:object="${sysUserSensitive}">
+            <input name="id" th:field="*{id}" type="hidden">
+
+            <div class="form-group">
+                <label class="col-sm-3 control-label">用户名称：</label>
+                <div class="col-sm-8">
+                    <input name="idCardName" th:field="*{idCardName}" class="form-control" type="text" readonly>
+                </div>
+            </div>
+            <div class="form-group">    
+                <label class="col-sm-3 control-label">身份证号：</label>
+                <div class="col-sm-8">
+                    <input name="idCardNum" th:field="*{idCardNum}" class="form-control" type="text" readonly>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-3 control-label">身份证正面：</label>
+                <div class="col-sm-3">
+                    <img id="idCardPositive" name="idCardPositive" th:src="*{idCardPositive}" th:width="100" th:height="100">
+                </div>
+                <label class="col-sm-3 control-label">身份证反面：</label>
+                <div class="col-sm-3">
+                    <img id="idCardNegative" name="idCardNegative" th:src="*{idCardNegative}" th:width="100" th:height="100">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-3 control-label">创建时间：</label>
+                <div class="col-sm-8">
+                    <input name="createTime" th:value="${#dates.format(sysUserSensitive.createTime, 'yyyy-MM-dd')}" class="form-control" placeholder="yyyy-MM-dd" type="text" readonly>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-3 control-label">确认状态：</label>
+                <div class="col-sm-8">
+                    <select name="confirmStatus" th:with="type=${@dict.getType('user_confirm_status')}"  th:field="*{confirmStatus}" class="form-control">
+                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}">
+                        </option>
+                    </select>
+                </div>
+            </div>
+
+        </form>
+    </div>
+    <th:block th:include="include :: footer" />
+    <th:block th:include="include :: datetimepicker-js" />
+    <script type="text/javascript">
+        var prefix = ctx + "lb/sensitive";
+        $("#form-sensitive-edit").validate({
+            focusCleanup: true
+        });
+
+        function submitHandler() {
+            if ($.validate.form()) {
+                $.operate.save(prefix + "/edit", $('#form-sensitive-edit').serialize());
+            }
+        }
+        $("input[name='createTime']").datetimepicker({
+            format: "yyyy-mm-dd",
+            minView: "month",
+            autoclose: true
+        });
+    </script>
+</body>
+</html>

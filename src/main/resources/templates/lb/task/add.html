@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <th:block th:include="include :: header('新增活动任务')" />
+    <th:block th:include="include :: datetimepicker-css" />
+    <th:block th:include="include :: summernote-css" />
+    <th:block th:include="include :: bootstrap-fileinput-css" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <form class="form-horizontal m" id="form-task-add">
+            <input type="hidden" name="status" value="1" >
+            <div class="form-group">
+                <label class="col-sm-3 control-label">活动标题：</label>
+                <div class="col-sm-8">
+                    <input name="activityTitle" class="form-control" type="text">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label">活动介绍：</label>
+                <div class="col-sm-8">
+                 <!--   <textarea name="activityRemark" class="form-control" ></textarea>-->
+                    <input id="activityRemark" name="activityRemark"  class="form-control" type="hidden">
+                    <div class="summernote"></div>
+                </div>
+            </div>
+
+            <div class="form-group">    
+                <label class="col-sm-3 control-label">活动图片：</label>
+                <div class="col-sm-8">
+                    <input name="activityPic" class="form-control" type="hidden">
+                    <input name="activityPicCopy" id="activityPicCopy" class="form-control" type="file">
+                    <p style="font-size:15px;color:red">注意活动图片默认选择最后一张上传图</p>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-3 control-label">中奖人数设定：</label>
+                <div class="col-sm-8">
+                    <input name="winnersNumber" class="form-control"  type="text"></input>
+                </div>
+            </div>
+
+            <input name="activityState" class="form-control" type="hidden" value="1">
+        </form>
+    </div>
+    <th:block th:include="include :: footer" />
+    <th:block th:include="include :: datetimepicker-js" />
+    <th:block th:include="include :: bootstrap-fileinput-js" />
+    <th:block th:include="include :: summernote-js" />
+    <script type="text/javascript">
+        var prefix = ctx + "lb/task"
+        $("#form-task-add").validate({
+            rules: {
+                activityTitle: "required",
+                activityRemark: "required",
+                winnersNumber: "required"
+            },
+            messages: {
+                activityTitle: "请填写活动标题",
+                activityRemark: "请填写活动介绍",
+                winnersNumber: "请填写中奖人数"
+            }
+        });
+
+        function submitHandler() {
+
+            if ($.validate.form()) {
+                var sHTML = $('.summernote').summernote('code');
+                $("#activityRemark").val(sHTML);
+                $.operate.save(prefix + "/add", $('#form-task-add').serialize());
+            }
+        }
+
+        $('.summernote').summernote({
+            placeholder: '请输入介绍内容',
+            height : 192,
+            lang : 'zh-CN',
+            followingToolbar: false,
+            callbacks: {
+                onImageUpload: function (files) {
+                    sendFile(files[0], this);
+                }
+            }
+        });
+
+        // 上传文件
+        function sendFile(file, obj) {
+            var data = new FormData();
+            data.append("activityPicCopy", file);
+            $.ajax({
+                type: "POST",
+                url:  prefix+"/upload_file",
+                data: data,
+                cache: false,
+                contentType: false,
+                processData: false,
+
+                success: function(result) {
+                    if (result.code == web_status.SUCCESS) {
+                        $(obj).summernote('editor.insertImage', result.url, result.fileName);
+                    } else {
+                        $.modal.alertError(result.msg);
+                    }
+                },
+                error: function(error) {
+                    $.modal.alertWarning("图片上传失败。");
+                }
+            });
+        }
+
+
+        $("input[name='lotteryTime']").datetimepicker({
+            format: "yyyy-mm-dd",
+            minView: "month",
+            autoclose: true
+        });
+
+        $(function () {
+            $("#activityPicCopy").fileinput({
+                language: 'zh',
+                uploadUrl: prefix+"/upload_file",
+                uploadAsync: true,
+                allowedFileExtensions : ['jpg', 'png','gif'],
+                maxFileCount:1,
+                minFileCount:1,
+                autoReplace:true,
+                showUpload: true,
+                showCaption: true,
+                overwriteInitial: false,
+                initialPreviewAsData: true,
+                initialPreview: []
+            }).on("fileuploaded", function (event, data, previewId, index) {
+                if (data.response.code==0){
+
+                    //上传成功
+                    $('input[name=activityPic]').val(data.response.fileName);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

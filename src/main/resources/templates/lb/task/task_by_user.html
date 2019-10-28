@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('活动任务列表')" />
+    <ul class="nav nav-tabs">
+        <li role="presentation" > <a th:href="@{/lb/sensitive/edit/{id}/(id=${userId})}">用户信息</a></li>
+        <li role="presentation"><a th:href="@{/lb/detail/list_by_payment/{userId}/(userId=${userId})}">打款记录</a></li>
+        <li role="presentation"><a th:href="@{/lb/detail/list_by_collection/{userId}/(userId=${userId})}">收款记录</a></li>
+        <li role="presentation"><a th:href="@{/lb/sensitive/sensitive_sub/{id}/(id=${userId})}">我的好友</a></li>
+        <li role="presentation"><a th:href="@{/lb/sensitive/my_team/{id}/(id=${userId})}">我的团队</a></li>
+        <li role="presentation" class="active"><a href="#">开奖记录</a></li>
+    </ul>
+</head>
+<body class="gray-bg">
+     <div class="container-div">
+        <div class="row">
+            <div class="col-sm-12 search-collapse">
+                <form id="formId">
+                    <div class="select-list">
+                        <ul>
+                            <input type="hidden" name="userId"  th:value="${userId}"/>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+
+            <div class="btn-group-sm" id="toolbar" role="group">
+                <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="lb:task:add">
+                    <i class="fa fa-plus"></i> 创建活动
+                </a>
+                <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="lb:task:export">
+                    <i class="fa fa-download"></i> 导出
+                 </a>
+            </div>
+            <div class="col-sm-12 select-table table-striped">
+                <table id="bootstrap-table" data-mobile-responsive="true"></table>
+            </div>
+        </div>
+    </div>
+    <th:block th:include="include :: footer" />
+    <script th:inline="javascript">
+        var editFlag = [[${@permission.hasPermi('lb:task:edit')}]];
+        var removeFlag = [[${@permission.hasPermi('lb:task:remove')}]];
+        var prefix = ctx + "lb/task";
+        var statusDatas = [[${@dict.getType('activity_status')}]];
+        $(function() {
+            var options = {
+                url: prefix + "/list_by_userid",
+                createUrl: prefix + "/add",
+                updateUrl: prefix + "/edit/{id}",
+                removeUrl: prefix + "/remove",
+                exportUrl: prefix + "/export",
+                modalName: "活动任务",
+                columns: [{
+                    checkbox: true
+                },
+                {
+                    field : 'id', 
+                    title : 'id',
+                    visible: false
+                },
+                {
+                    field : 'activityTitle', 
+                    title : '活动标题'
+                },
+                {
+                    field : 'activityPic', 
+                    title : '图片',
+                    formatter: function(value, row, index) {
+                        // 图片预览（注意：如存储在本地直接获取数据库路径，如有配置context-path需要使用ctx+路径）
+                        // 如：/profile/upload/2019/08/08/3b7a839aced67397bac694d77611ce72.png
+                        return $.table.imageView(value);
+                    }
+                },
+                {
+                    field : 'lotteryTime', 
+                    title : '开奖日期'
+                },
+                {
+                    field : 'createName',
+                    title : '创建人'
+                },
+                {
+                    field : 'createTime',
+                    title : '创建日期'
+                },
+                {
+                    field : 'updateName',
+                    title : '更新人'
+                },
+                {
+                    field : 'activityState', 
+                    title : '状态',
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(statusDatas, value);
+                    }
+                },
+                {
+                    title: '操作',
+                    align: 'center',
+                    formatter: function(value, row, index) {
+                        var actions = [];
+                        actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="$.operate.edit(\'' + row.id + '\')"><i class="fa fa-edit"></i>查看详情</a> ');
+                        return actions.join('');
+                    }
+                }]
+            };
+            $.table.init(options);
+        });
+        //开奖
+        function openWinner(id){
+            console.log(id);
+            $.post(prefix + "/open_winner",{"id":id},function (data) {
+                if (data.code==0){
+                    $.modal.alert("开奖成功");
+                }else{
+                    $.modal.alert(data.msg);
+                }
+                $('button[name=refresh]').click();
+            });
+        }
+    </script>
+</body>
+</html>
